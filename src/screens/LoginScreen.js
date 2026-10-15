@@ -33,6 +33,11 @@ export default function LoginScreen({ navigation }) {
    */
   const iniciarSesionThreads = async () => {
     // TODO: conectar con el OAuth 2.0 de la Threads API.
+    //
+    // SIMULACION TEMPORAL: esta espera de 1.2 s solo existe para que se vea
+    // el spinner mientras la API no esta conectada. Al integrar el OAuth hay
+    // que borrar esta linea y dejar aqui la llamada real.
+    await new Promise((resolve) => setTimeout(resolve, 1200));
   };
 
   const terminarCarga = () => setCargando(false);
@@ -107,6 +112,9 @@ export default function LoginScreen({ navigation }) {
               onPress={manejarAcceso}
               disabled={!formularioListo || cargando}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Iniciar sesion"
+              accessibilityState={{ disabled: !formularioListo || cargando, busy: cargando }}
             >
               {cargando ? (
                 <ActivityIndicator size="small" color="#000000" />
@@ -115,7 +123,12 @@ export default function LoginScreen({ navigation }) {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity activeOpacity={0.6} disabled={cargando}>
+            <TouchableOpacity
+              activeOpacity={0.6}
+              disabled={cargando}
+              accessibilityRole="button"
+              accessibilityLabel="Recuperar contrasena"
+            >
               <Text style={styles.enlace}>Olvidaste tu contrasena?</Text>
             </TouchableOpacity>
           </View>
