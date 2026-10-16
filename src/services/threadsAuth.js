@@ -4,88 +4,65 @@ import { threadsConfig } from '../config/threads';
 
 WebBrowser.maybeCompleteAuthSession();
 
-function leerParametro(url, nombre) {
-  const consulta = url.split('?')[1] || '';
+export const SESION_PRUEBA = { usuario: 'modo_prueba', id: 'prueba', prueba: true };
+
+export function leerParametro(url, nombre) {
+  const consulta = (url.split('?')[1] || '').split('#')[0];
   const par = consulta.split('&').find((parte) => parte.startsWith(`${nombre}=`));
-  if (!par) {
-    return '';
-  }
-  return decodeURIComponent(par.slice(nombre.length + 1));
+  return par ? decodeURIComponent(par.slice(nombre.length + 1).replace(/\+/g, ' ')) : '';
 }
 
-function llavesListas() {
-  return threadsConfig.appId.trim() !== '' && threadsConfig.appSecret.trim() !== '';
+export function configLista(config = threadsConfig) {
+  return config.appId.trim() !== '' && config.tokenServer.trim() !== '';
 }
 
-async function cambiarCodigoPorSesion(code, redirectUri) {
-  const cuerpo = new URLSearchParams({
-    client_id: threadsConfig.appId,
-    client_secret: threadsConfig.appSecret,
-    grant_type: 'authorization_code',
-    redirect_uri: redirectUri,
-    code,
-  });
+export function construirUrlAutorizacion(config, returnUrl) {
+  const authUrl = `${config.authorizeUrl}?${new URLSearchParams({
+    client_id: config.appId.trim(),
+    redirect_uri: config.redirectHttps,
+    scope: config.scopes.join(','),
+    response_type: 'code',
+  }).toString()}`;
+  return `${config.redirectHttps}/start?${new URLSearchParams({ authUrl, returnUrl }).toString()}`;
+}
 
-  const tokenRespuesta = await fetch(threadsConfig.tokenEndpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: cuerpo.toString(),
-  });
-  const token = await tokenRespuesta.json();
-
-  if (!tokenRespuesta.ok || !token.access_token) {
-    return {
-      ok: false,
-      motivo: 'token',
-      mensaje: token.error_message || 'Meta no entregó la sesión.',
-    };
+// El secret no está en la app: el backend (server/index.js) hace el intercambio y valida la sesión.
+export async function cambiarCodigoPorSesion(code, config = threadsConfig) {
+  try {
+    const r = await fetch(`${config.tokenServer}/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    const datos = await r.json();
+    if (!r.ok || !datos.usuario) {
+      return { ok: false, motivo: 'token', mensaje: datos.error || 'Meta no entregó la sesión.' };
+    }
+    return { ok: true, sesion: { usuario: datos.usuario, id: datos.id || '' } };
+  } catch (e) {
+    return { ok: false, motivo: 'servidor', mensaje: 'No se pudo contactar el servidor de tokens (npm run server).' };
   }
-
-  const perfilUrl = `${threadsConfig.perfilEndpoint}?fields=id,username,name&access_token=${encodeURIComponent(token.access_token)}`;
-  const perfilRespuesta = await fetch(perfilUrl);
-  const perfil = await perfilRespuesta.json();
-
-  return {
-    ok: true,
-    sesion: {
-      usuario: perfil.username || perfil.name || 'Threads',
-      id: perfil.id || '',
-    },
-  };
 }
 
 export async function iniciarSesionThreads() {
-  if (!llavesListas()) {
+  if (!configLista()) {
     return { ok: false, motivo: 'sin_llaves' };
   }
-
-  const redirectUri = AuthSession.makeRedirectUri({
-    scheme: 'threadslogin',
-    path: 'oauth',
-  });
-
-  const authUrl =
-    `${threadsConfig.authorizationEndpoint}` +
-    `?client_id=${encodeURIComponent(threadsConfig.appId)}` +
-    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&scope=${encodeURIComponent(threadsConfig.scopes.join(','))}` +
-    `&response_type=code`;
-
-  const resultado = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
-
+  const returnUrl = AuthSession.makeRedirectUri({ scheme: 'threadslogin', path: 'oauth' });
+  const resultado = await WebBrowser.openAuthSessionAsync(
+    construirUrlAutorizacion(threadsConfig, returnUrl),
+    returnUrl,
+  );
   if (resultado.type === 'cancel' || resultado.type === 'dismiss') {
     return { ok: false, motivo: 'cancelado' };
   }
-
   if (resultado.type !== 'success') {
     return { ok: false, motivo: 'navegador', mensaje: 'No se abrió la autorización de Threads.' };
   }
-
   const code = leerParametro(resultado.url, 'code');
   const error = leerParametro(resultado.url, 'error_message') || leerParametro(resultado.url, 'error');
   if (!code) {
     return { ok: false, motivo: 'codigo', mensaje: error || 'Threads no devolvió el código.' };
   }
-
-  return cambiarCodigoPorSesion(code, redirectUri);
+  return cambiarCodigoPorSesion(code);
 }

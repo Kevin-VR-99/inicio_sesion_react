@@ -8,7 +8,8 @@ import {
   Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { iniciarSesionThreads } from '../services/threadsAuth';
+import { iniciarSesionThreads, SESION_PRUEBA } from '../services/threadsAuth';
+import { threadsConfig } from '../config/threads';
 
 export default function LoginScreen({ navigation }) {
   const [cargando, setCargando] = useState(false);
@@ -35,11 +36,7 @@ export default function LoginScreen({ navigation }) {
       if (resultado.motivo === 'sin_llaves') {
         Alert.alert(
           'Faltan las llaves de Threads',
-          'Pon el Client ID y el Client Secret en src/config/threads.js. Puedes seguir para ver el resto de la app.',
-          [
-            { text: 'Cancelar', style: 'cancel' },
-            { text: 'Ver la app', onPress: () => irABienvenida(null) },
-          ],
+          'Configura EXPO_PUBLIC_THREADS_APP_ID y EXPO_PUBLIC_TOKEN_SERVER en .env (ver README).',
         );
         return;
       }
@@ -79,6 +76,17 @@ export default function LoginScreen({ navigation }) {
           <Text style={styles.botonTexto}>Continuar con Threads</Text>
         )}
       </TouchableOpacity>
+
+      {threadsConfig.modoPrueba ? (
+        <TouchableOpacity
+          style={styles.botonPrueba}
+          onPress={() => irABienvenida(SESION_PRUEBA)}
+          accessibilityRole="button"
+          accessibilityLabel="Entrar en modo de prueba"
+        >
+          <Text style={styles.botonPruebaTexto}>Entrar en MODO DE PRUEBA (sin Threads)</Text>
+        </TouchableOpacity>
+      ) : null}
 
       <Text style={styles.pie}>
         El botón muestra la carga y después abre la autorización de Threads.
@@ -127,6 +135,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#000000',
+  },
+  botonPrueba: {
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#FFB800',
+    borderRadius: 12,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  botonPruebaTexto: {
+    color: '#FFB800',
+    fontSize: 14,
+    fontWeight: '700',
   },
   pie: {
     marginTop: 28,
