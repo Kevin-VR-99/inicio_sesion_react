@@ -1,36 +1,49 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
-export default function DetailScreen({ route }) {
-  const integrante = route.params?.integrante;
-
-  if (!integrante) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.nombre}>No hay datos de este integrante.</Text>
-      </View>
-    );
-  }
+// Combina la versión de Rigoberto (main) con la de feature/flujo-splash-detalle:
+// acepta { integrante: { name, role, bio } } o { nombre, rol, descripcion, correo }.
+export default function DetailScreen({ route, navigation }) {
+  const params = route.params || {};
+  const integrante = params.integrante || {};
+  const nombre = params.nombre || integrante.name;
+  const rol = params.rol || integrante.role;
+  const descripcion = params.descripcion || integrante.bio;
+  const correo = params.correo || integrante.correo;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.avatar}>
-        <Text style={styles.inicial}>{integrante.name.charAt(0)}</Text>
+    <ScrollView style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.backText}>← Regresar</Text>
+      </TouchableOpacity>
+
+      <View style={styles.content}>
+        {nombre ? (
+          <View style={styles.avatar}>
+            <Text style={styles.inicial}>{nombre.charAt(0)}</Text>
+          </View>
+        ) : null}
+        <Text style={styles.title}>{nombre || 'Integrante'}</Text>
+        <Text style={styles.role}>{rol || 'Rol no definido'}</Text>
+
+        <View style={styles.divider} />
+
+        <Text style={styles.sectionTitle}>Información</Text>
+        <Text style={styles.description}>
+          {descripcion || 'Aquí va la biografía o descripción del integrante.'}
+        </Text>
+
+        {correo ? <Text style={styles.email}>Correo: {correo}</Text> : null}
       </View>
-      <Text style={styles.nombre}>{integrante.name}</Text>
-      <Text style={styles.rol}>{integrante.role}</Text>
-      <Text style={styles.bio}>{integrante.bio}</Text>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 24,
-    paddingTop: 32,
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  backButton: { padding: 20, paddingTop: 50 },
+  backText: { fontSize: 16, color: '#000', fontWeight: '600' },
+  content: { padding: 20 },
   avatar: {
     width: 72,
     height: 72,
@@ -40,25 +53,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
   },
-  inicial: {
-    color: '#FFFFFF',
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  nombre: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  rol: {
-    marginTop: 8,
-    fontSize: 15,
-    color: '#555555',
-  },
-  bio: {
-    marginTop: 20,
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#222222',
-  },
+  inicial: { color: '#FFFFFF', fontSize: 28, fontWeight: '700' },
+  title: { fontSize: 32, fontWeight: 'bold', color: '#000', marginBottom: 8 },
+  role: { fontSize: 18, color: '#666', marginBottom: 20 },
+  divider: { height: 1, backgroundColor: '#EEEEEE', marginVertical: 20 },
+  sectionTitle: { fontSize: 20, fontWeight: '600', marginBottom: 10 },
+  description: { fontSize: 16, lineHeight: 24, color: '#333' },
+  email: { marginTop: 20, fontSize: 15, color: '#555' },
 });

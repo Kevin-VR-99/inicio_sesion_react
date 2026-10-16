@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -21,7 +21,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Bienvenida" component={MainScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="Detalle" component={DetailScreen} options={{ title: 'Integrante' }} />
+      <Stack.Screen name="Detalle" component={DetailScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
