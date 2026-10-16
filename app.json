@@ -3,6 +3,7 @@
     "name": "mi-app-threads",
     "slug": "mi-app-threads",
     "version": "1.0.0",
+    "scheme": "threadslogin",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,6 +25,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }

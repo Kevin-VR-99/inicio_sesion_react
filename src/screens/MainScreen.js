@@ -1,20 +1,15 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import integrantes from '../data/integrantes';
 
-const integrantes = [
-  { id: '1', name: 'Kevin', role: 'Splash Screen y Configuración Inicial', bio: 'Creación de la pantalla de bienvenida/carga y estructura base del repositorio.' },
-  { id: '2', name: 'Ailton', role: 'Login Screen (Front-End Threads)', bio: 'Diseño de la pantalla de Login con estética minimalista estilo Threads.' },
-  { id: '3', name: 'Gabriel', role: 'Integración API Threads (Back-End OAuth 2.0)', bio: 'Configuración en Meta for Developers y lógica de autenticación OAuth 2.0.' },
-  { id: '4', name: 'Aurelio', role: 'Pantalla de Bienvenida y 5 Tarjetas', bio: 'Interfaz principal con la información de la materia y tarjetas interactivas.' },
-  { id: '5', name: 'Rigoberto', role: 'Detalle del Integrante & Navegación', bio: 'Gestión de perfil detallado y sistema general de rutas (React Navigation).' },
-];
+export default function MainScreen({ navigation, route }) {
+  const usuario = route.params?.sesion?.usuario;
 
-export default function MainScreen({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Información de la materia */}
       <Text style={styles.headerTitle}>Desarrollo Móvil Integral</Text>
-      <Text style={styles.subtitle}>Equipo MVP-LA — FootwearPoint</Text>
+      <Text style={styles.subtitle}>Equipo MVP-LA</Text>
+      {usuario ? <Text style={styles.sesion}>Sesión de @{usuario}</Text> : null}
 
       {/* 5 Tarjetas Interactivas */}
       <View style={styles.cardsContainer}>
@@ -22,7 +17,7 @@ export default function MainScreen({ navigation }) {
           <TouchableOpacity
             key={item.id}
             style={styles.card}
-            onPress={() => navigation.navigate('Detail', { integrante: item })}
+            onPress={() => navigation.navigate('Detalle', { integrante: item })}
           >
             <View style={styles.avatarPlaceholder}>
               <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
@@ -54,8 +49,14 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 8,
     color: '#6c757d',
+  },
+  sesion: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#000000',
   },
   cardsContainer: {
     width: '100%',
