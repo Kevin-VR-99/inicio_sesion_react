@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
 import integrantes from '../data/integrantes';
 
 export default function MainScreen({ navigation, route }) {
@@ -19,9 +19,13 @@ export default function MainScreen({ navigation, route }) {
             style={styles.card}
             onPress={() => navigation.navigate('Detalle', { integrante: item })}
           >
-            <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
-            </View>
+            {item.foto ? (
+              <Image source={item.foto} style={styles.avatarFoto} resizeMode="cover" />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
+              </View>
+            )}
             <View style={styles.cardInfo}>
               <Text style={styles.cardTitle}>{item.name}</Text>
               <Text style={styles.cardRole}>{item.role}</Text>
@@ -82,6 +86,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
+  },
+  avatarFoto: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 15,
+    backgroundColor: '#e9ecef',
   },
   avatarText: {
     color: '#ffffff',
