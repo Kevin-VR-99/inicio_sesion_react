@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 
 // Combina la versión de Rigoberto (main) con la de feature/flujo-splash-detalle:
 // acepta { integrante: { name, role, bio } } o { nombre, rol, descripcion, correo }.
@@ -10,6 +10,7 @@ export default function DetailScreen({ route, navigation }) {
   const rol = params.rol || integrante.role;
   const descripcion = params.descripcion || integrante.bio;
   const correo = params.correo || integrante.correo;
+  const foto = params.foto || integrante.foto;
 
   return (
     <ScrollView style={styles.container}>
@@ -18,7 +19,9 @@ export default function DetailScreen({ route, navigation }) {
       </TouchableOpacity>
 
       <View style={styles.content}>
-        {nombre ? (
+        {foto ? (
+          <Image source={foto} style={styles.avatarFoto} resizeMode="cover" />
+        ) : nombre ? (
           <View style={styles.avatar}>
             <Text style={styles.inicial}>{nombre.charAt(0)}</Text>
           </View>
@@ -52,6 +55,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
+  },
+  avatarFoto: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    marginBottom: 16,
+    backgroundColor: '#e9ecef',
   },
   inicial: { color: '#FFFFFF', fontSize: 28, fontWeight: '700' },
   title: { fontSize: 32, fontWeight: 'bold', color: '#000', marginBottom: 8 },
